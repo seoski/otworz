@@ -26,7 +26,8 @@
 <details id="szczegoly" hidden><summary>Polecenie, które się wpisze</summary><pre id="polecenie"></pre></details>
 <script>
   (function () {
-    var cel = decodeURIComponent(location.hash.slice(1));
+    // Bez dekodowania: adres po # jest już zakodowany, ponowne dekodowanie rozbiłoby „&” w poleceniu.
+    var cel = location.hash.slice(1);
     // Tylko adresy aplikacji Claude — strona nie może posłużyć do przekierowania gdzie indziej.
     if (!/^claude:\/\/(code\/new|resume)\?/.test(cel)) {
       document.getElementById("tytul").textContent = "Brak poprawnego linku";
