@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Otwieram Claude…</title>
+<style>
+  body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 640px; margin: 12vh auto; padding: 0 20px; color: #222; }
+  a.btn { display: inline-block; padding: 12px 20px; background: #c96442; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  pre { white-space: pre-wrap; background: #f4f2ee; padding: 12px; border-radius: 8px; font-size: 14px; }
+  .szary { color: #777; font-size: 14px; }
+</style>
+</head>
+<body>
+<!--
+  Przekaźnik z Notion do aplikacji Claude na Macu. Notion otwiera tylko linki https://,
+  więc link w bazie prowadzi tutaj, a ta strona przekazuje dalej do claude://.
+  Cel jest PO ZNAKU # — przeglądarka nie wysyła tej części do serwera, więc treść zadań
+  nie trafia ani do GitHuba, ani do nikogo innego. Strona nic nie zapisuje.
+-->
+<h2 id="tytul">Otwieram Claude…</h2>
+<p id="opis" class="szary">Jeśli przeglądarka zapyta, pozwól otworzyć aplikację Claude (warto zaznaczyć „zawsze”).</p>
+<p><a id="btn" class="btn" href="#">Otwórz w Claude</a></p>
+<details id="szczegoly" hidden><summary>Polecenie, które się wpisze</summary><pre id="polecenie"></pre></details>
+<script>
+  (function () {
+    var cel = decodeURIComponent(location.hash.slice(1));
+    // Tylko adresy aplikacji Claude — strona nie może posłużyć do przekierowania gdzie indziej.
+    if (!/^claude:\/\/(code\/new|resume)\?/.test(cel)) {
+      document.getElementById("tytul").textContent = "Brak poprawnego linku";
+      document.getElementById("opis").textContent = "Ten link nie prowadzi do aplikacji Claude.";
+      document.getElementById("btn").hidden = true;
+      return;
+    }
+    document.getElementById("btn").href = cel;
+    try {
+      var q = new URL(cel.replace("claude://", "https://x/")).searchParams.get("q");
+      if (q) { document.getElementById("polecenie").textContent = q; document.getElementById("szczegoly").hidden = false; }
+    } catch (e) {}
+    location.href = cel;
+  })();
+</script>
+</body>
+</html>
