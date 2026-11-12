@@ -28,18 +28,33 @@
   (function () {
     // Bez dekodowania: adres po # jest już zakodowany, ponowne dekodowanie rozbiłoby „&” w poleceniu.
     var cel = location.hash.slice(1);
+    var btn = document.getElementById("btn");
     // Tylko adresy aplikacji Claude — strona nie może posłużyć do przekierowania gdzie indziej.
     if (!/^claude:\/\/(code\/new|resume)\?/.test(cel)) {
       document.getElementById("tytul").textContent = "Brak poprawnego linku";
       document.getElementById("opis").textContent = "Ten link nie prowadzi do aplikacji Claude.";
-      document.getElementById("btn").hidden = true;
+      btn.hidden = true;
       return;
     }
-    document.getElementById("btn").href = cel;
-    try {
-      var q = new URL(cel.replace("claude://", "https://x/")).searchParams.get("q");
-      if (q) { document.getElementById("polecenie").textContent = q; document.getElementById("szczegoly").hidden = false; }
-    } catch (e) {}
+    var q = null;
+    try { q = new URL(cel.replace("claude://", "https://x/")).searchParams.get("q"); } catch (e) {}
+    if (q) { document.getElementById("polecenie").textContent = q; document.getElementById("szczegoly").hidden = false; }
+    btn.href = cel;
+    if (cel.indexOf("claude://resume?") === 0) {
+      // Wznowienie wątku nie wpisuje polecenia samo — kopiujemy je do schowka przy kliknięciu
+      // (schowek działa tylko po kliknięciu, nie przy samym otwarciu strony), potem otwieramy wątek.
+      document.getElementById("tytul").textContent = "Kontynuuj wątek";
+      document.getElementById("opis").textContent = q
+        ? "Kliknij przycisk: polecenie trafi do schowka, otworzy się wątek — wklej Cmd+V i Enter."
+        : "Kliknij przycisk, żeby otworzyć wątek.";
+      btn.textContent = q ? "Skopiuj polecenie i otwórz wątek" : "Otwórz wątek";
+      btn.addEventListener("click", function (e) {
+        if (!q || !navigator.clipboard) return;
+        e.preventDefault();
+        navigator.clipboard.writeText(q).finally(function () { location.href = cel; });
+      });
+      return;
+    }
     location.href = cel;
   })();
 </script>
